@@ -1,5 +1,7 @@
 # arducharts — ArduPilot Configuration Manager
 
+<img width="3262" height="1880" alt="CleanShot 2026-04-16 at 16 29 15@2x" src="https://github.com/user-attachments/assets/9162f717-4c76-490c-9c54-8185b3b7b30f" />
+
 ## Philosophy
 
 ArduPilot has over 10,000 parameters. Managing them as flat `.param` files is fragile — configs grow stale, differ between airframes for no documented reason, and the knowledge of *why* a parameter was set lives only in someone's head.
