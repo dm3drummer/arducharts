@@ -1,0 +1,35 @@
+[tool.pylint.main]
+# Discover modules inside the venv
+init-hook = "import sys; sys.path.insert(0, '.')"
+
+[tool.pylint."messages control"]
+disable = [
+    # Import errors — pylint can't see venv packages
+    "import-error",           # E0401
+    "no-name-in-module",      # E0611
+
+    # Intentional in TUI — we catch broadly and notify the user
+    "broad-exception-caught",  # W0718
+
+    # Test files don't need docstrings
+    "missing-class-docstring",     # C0115
+    "missing-function-docstring",  # C0116
+
+    # Structural — tui.py is a single-module TUI, these are expected
+    "too-many-lines",              # C0302
+    "too-many-instance-attributes", # R0902
+    "too-many-locals",             # R0914
+    "too-many-branches",           # R0912
+    "too-many-statements",         # R0915
+    "too-many-arguments",          # R0913
+    "too-many-positional-arguments", # R0917
+    "too-many-nested-blocks",      # R1702
+    "too-few-public-methods",      # R0903
+
+    # Acceptable patterns
+    "import-outside-toplevel",     # C0415 — lazy imports for optional deps
+    "protected-access",            # W0212 — needed in tests
+]
+
+[tool.pylint.format]
+max-line-length = 100

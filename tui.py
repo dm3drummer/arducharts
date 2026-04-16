@@ -463,11 +463,11 @@ class FCConnectionBar(Static):
 
     def compose(self) -> ComposeResult:
         ports = self._scan_ports()
-        port_kwargs: dict = dict(
-            id="fc-port",
-            allow_blank=True,
-            prompt="No ports found" if not ports else "Select port",
-        )
+        port_kwargs: dict = {
+            "id": "fc-port",
+            "allow_blank": True,
+            "prompt": "No ports found" if not ports else "Select port",
+        }
         if ports:
             port_kwargs["value"] = ports[0][1]
         yield Select(ports, **port_kwargs)
@@ -1046,7 +1046,7 @@ class APConfigApp(App):
             self._update_fc_button_states()
             # Refresh Overview data; only switch tab if already on Overview
             current_tab = self.query_one(TabbedContent).active
-            self._show_plane_overview(switch_tab=(current_tab == "tab-overview"))
+            self._show_plane_overview(switch_tab=current_tab == "tab-overview")
             self.notify(f"Plane selected: {event.node.data}")
         elif tree.id == "charts-tree" and event.node.data is not None:
             data = str(event.node.data)
@@ -1161,7 +1161,7 @@ class APConfigApp(App):
         if event.input.id != "search-input":
             return
         try:
-            search_input = self.query_one("#search-input", Input)
+            _search_input = self.query_one("#search-input", Input)
         except Exception:
             return
         query = event.value.strip()
@@ -1346,7 +1346,7 @@ class APConfigApp(App):
         btn.variant = "warning"
 
         try:
-            mav = MAVLinkConnection(port, baud)
+            mav = MAVLinkConnection(port, baud)  # pylint: disable=possibly-used-before-assignment
             self.mav_connection = mav
             sys_id = mav.conn.target_system
             comp_id = mav.conn.target_component
@@ -1759,7 +1759,7 @@ class APConfigApp(App):
         select1 = self.query_one("#diff-plane1", Select)
         select2 = self.query_one("#diff-plane2", Select)
 
-        if select1.value == Select.BLANK or select2.value == Select.BLANK:
+        if Select.BLANK in (select1.value, select2.value):
             self.notify("Select two sources to diff.", severity="warning")
             return
 

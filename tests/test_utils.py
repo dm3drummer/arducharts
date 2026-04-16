@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import math
-from pathlib import Path
-
 from arducharts.utils import (
     DEFAULT_BAUD,
     PDEF_URL,
@@ -111,20 +109,20 @@ class TestComputeParamDiff:
         d = {"A": 1, "B": 2}
         c = {"A": 1, "B": 2}
         changes, missing, matching = compute_param_diff(d, c)
-        assert changes == []
-        assert missing == []
+        assert not changes
+        assert not missing
         assert matching == 2
 
     def test_one_change(self):
         changes, missing, matching = compute_param_diff({"A": 1}, {"A": 2})
         assert len(changes) == 1
         assert changes[0] == ("A", 2, 1)
-        assert missing == []
+        assert not missing
         assert matching == 0
 
     def test_missing_param(self):
-        changes, missing, matching = compute_param_diff({"A": 1}, {})
-        assert changes == []
+        changes, missing, _matching = compute_param_diff({"A": 1}, {})
+        assert not changes
         assert len(missing) == 1
         assert missing[0] == ("A", 1)
 
@@ -140,14 +138,14 @@ class TestComputeParamDiff:
 
     def test_normalization_applied(self):
         # 3.0 (float) vs 3 (int) should match after normalization
-        changes, missing, matching = compute_param_diff({"A": 3.0}, {"A": 3})
+        changes, _missing, matching = compute_param_diff({"A": 3.0}, {"A": 3})
         assert matching == 1
-        assert changes == []
+        assert not changes
 
     def test_empty_dicts(self):
         changes, missing, matching = compute_param_diff({}, {})
-        assert changes == []
-        assert missing == []
+        assert not changes
+        assert not missing
         assert matching == 0
 
 

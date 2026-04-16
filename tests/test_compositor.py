@@ -146,7 +146,7 @@ class TestListCharts:
 
     def test_empty_charts_dir(self, tmp_path: Path):
         compositor = ParamCompositor(tmp_path)
-        assert compositor.list_charts() == []
+        assert not compositor.list_charts()
 
 
 # -- list_schema_charts --
@@ -162,7 +162,7 @@ class TestListSchemaCharts:
 
     def test_empty_schema_dir(self, tmp_path: Path):
         compositor = ParamCompositor(tmp_path)
-        assert compositor.list_schema_charts() == []
+        assert not compositor.list_schema_charts()
 
 
 # -- get_schema_params --
@@ -211,13 +211,13 @@ class TestMatchCharts:
     def test_match_returns_matching_charts(self, mini_config_dir: Path):
         compositor = ParamCompositor(mini_config_dir)
         fc_params = {"PARAM_A": 1, "PARAM_B": 2, "PARAM_C": 10}
-        matched, values, unmatched = compositor.match_charts(fc_params)
+        matched, _values, _unmatched = compositor.match_charts(fc_params)
         assert "alpha" in matched
 
     def test_override_values_for_differing_params(self, mini_config_dir: Path):
         compositor = ParamCompositor(mini_config_dir)
         fc_params = {"PARAM_A": 5, "PARAM_B": 2}
-        matched, values, unmatched = compositor.match_charts(fc_params)
+        matched, values, _unmatched = compositor.match_charts(fc_params)
         assert "alpha" in matched
         assert "alpha" in values
         assert values["alpha"]["PARAM_A"] == 5
@@ -232,7 +232,7 @@ class TestMatchCharts:
         compositor = ParamCompositor(mini_config_dir)
         # FC has PARAM_D which is in myschema but not in any user chart
         fc_params = {"PARAM_A": 1, "PARAM_B": 2, "PARAM_D": 50}
-        matched, values, unmatched = compositor.match_charts(fc_params)
+        matched, _values, unmatched = compositor.match_charts(fc_params)
         assert "myschema" in matched
         assert "PARAM_D" not in unmatched
 
@@ -295,8 +295,8 @@ class TestParamFileIO:
         output = tmp_path / "rt.param"
         ParamCompositor.to_param_file(original, output)
         readback = ParamCompositor.read_param_file(output)
-        for key in original:
-            assert readback[key] == pytest.approx(original[key], abs=1e-5)
+        for key, value in original.items():
+            assert readback[key] == pytest.approx(value, abs=1e-5)
 
 
 # -- _merge_params --
@@ -331,7 +331,7 @@ class TestImportAsCharts:
     def test_creates_charts_per_family(self, mini_config_dir: Path):
         compositor = ParamCompositor(mini_config_dir)
         fc_params = {"PARAM_A": 1, "PARAM_B": 2, "PARAM_D": 50}
-        charts, unmatched = compositor.import_as_charts(fc_params, "test_import")
+        charts, _unmatched = compositor.import_as_charts(fc_params, "test_import")
         # PARAM_A, PARAM_B, PARAM_D are all in myschema
         assert "test_import/myschema" in charts
         chart_dir = mini_config_dir / "charts" / "test_import" / "myschema"
@@ -359,7 +359,7 @@ class TestImportAsCharts:
         compositor = ParamCompositor(tmp_path)
         fc_params = {"A": 1, "B": 2}
         charts, unmatched = compositor.import_as_charts(fc_params, "empty")
-        assert charts == []
+        assert not charts
         assert len(unmatched) == 2
 
     def test_chart_yaml_has_base(self, mini_config_dir: Path):
@@ -466,7 +466,7 @@ class TestChartZipIO:
                         f"imported/{c.split('/')[-1]}" if "/" in c else f"imported/{c}"
                         for c in pd.get("charts", [])
                     ]
-                    with open(target, "w") as f:
+                    with open(target, "w", encoding="utf-8") as f:
                         yaml.dump(pd, f)
                 else:
                     target.write_bytes(data)

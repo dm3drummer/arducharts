@@ -26,7 +26,7 @@ class TestRequireMavlink:
 
 class TestMAVLinkConnectionInit:
     @pytest.mark.skipif(not HAS_MAVLINK, reason="pymavlink not installed")
-    def test_init_calls_mavutil(self, monkeypatch):
+    def test_init_calls_mavutil(self, monkeypatch):  # pylint: disable=unused-argument
         mock_conn = MagicMock()
         mock_conn.target_system = 1
         mock_conn.target_component = 1
@@ -34,25 +34,25 @@ class TestMAVLinkConnectionInit:
 
         with patch("arducharts.mavlink_io.mavutil") as mock_mavutil:
             mock_mavutil.mavlink_connection.return_value = mock_conn
-            mav = MAVLinkConnection.__new__(MAVLinkConnection)
+            _mav = MAVLinkConnection.__new__(MAVLinkConnection)
             # Manually call __init__ with mocked mavutil
             with patch.object(MAVLinkConnection, "__init__", lambda self, *a, **kw: None):
                 pass
             # Directly test the constructor logic via a real call
             mock_mavutil.mavlink_connection.return_value = mock_conn
-            mav = MAVLinkConnection("tcp:127.0.0.1:5760", baud=115200)
+            _mav = MAVLinkConnection("tcp:127.0.0.1:5760", baud=115200)
             mock_mavutil.mavlink_connection.assert_called_once()
             mock_conn.wait_heartbeat.assert_called_once()
 
     @pytest.mark.skipif(not HAS_MAVLINK, reason="pymavlink not installed")
-    def test_context_manager(self, monkeypatch):
+    def test_context_manager(self, monkeypatch):  # pylint: disable=unused-argument
         mock_conn = MagicMock()
         mock_conn.target_system = 1
         mock_conn.target_component = 1
 
         with patch("arducharts.mavlink_io.mavutil") as mock_mavutil:
             mock_mavutil.mavlink_connection.return_value = mock_conn
-            with MAVLinkConnection("tcp:127.0.0.1:5760") as mav:
+            with MAVLinkConnection("tcp:127.0.0.1:5760") as _mav:
                 pass
             mock_conn.close.assert_called_once()
 
@@ -68,4 +68,4 @@ class TestFlashParamsDryRun:
             mock_mavutil.mavlink_connection.return_value = mock_conn
             with MAVLinkConnection("tcp:127.0.0.1:5760") as mav:
                 failed = mav.flash_params({"A": 1, "B": 2}, dry_run=True)
-                assert failed == []
+                assert not failed

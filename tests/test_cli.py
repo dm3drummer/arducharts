@@ -65,7 +65,7 @@ class TestCmdBuild:
         param_file = mini_config_dir / "build" / "test_plane.param"
         assert param_file.exists()
 
-    def test_custom_output(self, mini_config_dir: Path, tmp_path: Path, capsys):
+    def test_custom_output(self, mini_config_dir: Path, tmp_path: Path, capsys):  # pylint: disable=unused-argument
         out_path = tmp_path / "custom.param"
         cmd_build(ns(
             config_dir=str(mini_config_dir),

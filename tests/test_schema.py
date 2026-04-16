@@ -6,8 +6,6 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
-
 from arducharts.schema import ParamSchema
 
 
@@ -58,7 +56,7 @@ class TestParamSchemaSearch:
 
     def test_search_no_results(self, pdef_cache_dir: Path):
         schema = ParamSchema(pdef_cache_dir)
-        assert schema.search("zzzzzzz") == []
+        assert not schema.search("zzzzzzz")
 
     def test_search_case_insensitive(self, pdef_cache_dir: Path):
         schema = ParamSchema(pdef_cache_dir)
@@ -106,32 +104,32 @@ class TestParamSchemaDescribe:
 class TestParamSchemaValidation:
     def test_valid_params_no_errors(self, pdef_cache_dir: Path):
         schema = ParamSchema(pdef_cache_dir)
-        errors, warnings = schema.validate_params({"ARSPD_TYPE": 1})
-        assert errors == []
+        errors, _warnings = schema.validate_params({"ARSPD_TYPE": 1})
+        assert not errors
 
     def test_out_of_range_produces_error(self, pdef_cache_dir: Path):
         schema = ParamSchema(pdef_cache_dir)
-        errors, warnings = schema.validate_params({"ARSPD_TYPE": 999})
+        errors, _warnings = schema.validate_params({"ARSPD_TYPE": 999})
         assert len(errors) == 1
         assert "out of range" in errors[0]
 
     def test_unknown_param_produces_warning(self, pdef_cache_dir: Path):
         schema = ParamSchema(pdef_cache_dir)
-        errors, warnings = schema.validate_params({"UNKNOWN_XYZ": 5})
+        _errors, warnings = schema.validate_params({"UNKNOWN_XYZ": 5})
         assert any("Unknown param" in w for w in warnings)
 
     def test_invalid_enum_produces_warning(self, pdef_cache_dir: Path):
         schema = ParamSchema(pdef_cache_dir)
         # Value 50 is in range [0..100] but not in the Values enum
         errors, warnings = schema.validate_params({"ARSPD_TYPE": 50})
-        assert errors == []
+        assert not errors
         assert any("not in" in w for w in warnings)
 
     def test_zero_value_skips_range_check(self, pdef_cache_dir: Path):
         schema = ParamSchema(pdef_cache_dir)
         # BATT_MONITOR has range [0..50], value 0 should not error
         errors, _ = schema.validate_params({"BATT_MONITOR": 0})
-        assert errors == []
+        assert not errors
 
     def test_dynamic_prefix_skipped(self, pdef_cache_dir: Path):
         schema = ParamSchema(pdef_cache_dir)
@@ -148,7 +146,7 @@ class TestParamSchemaValidation:
         schema = ParamSchema(tmp_path)
         schema._defs = {}
         errors, warnings = schema.validate_params({"ANYTHING": 1})
-        assert errors == []
+        assert not errors
         assert len(warnings) == 1
         assert "not available" in warnings[0]
 
