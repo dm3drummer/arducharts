@@ -1,4 +1,4 @@
-name: Pylint
+name: Build & Test
 
 on:
   pull_request:
@@ -16,8 +16,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pylint
         pip install -r requirements.txt
-    - name: Analysing the code with pylint
+        pip install pytest
+    - name: Verify imports
       run: |
-        pylint arducharts/ tui.py tests/
+        python -c "from arducharts import ParamCompositor, ParamSchema"
+        python -c "from arducharts.cli import main"
+    - name: Run tests
+      run: |
+        python -m pytest tests/ -v
